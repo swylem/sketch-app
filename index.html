@@ -5,24 +5,155 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sketch App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <h1>Sketch App</h1>
     <div class="container">
-        <h1>Sketch App</h1>
-        <div class="sketching-tools">
-            <div class="color-tool">
-                <input type="color" value="#000">
-                <button>Color Mode</button>
-            </div>  
-            <button>Rainbow Mode</button>
-            <button>Color <Identifier></Identifier></button>
-            <button>Eraser</button>
-            <button>Clear</button>
-            <input type="range" value="64" min="0" max="64">
+        <div class="sketching-tools-wrapper">
+            <input class="color-selector" type="color" value="#000000">
+            <div class="sketching-tools">
+                <button class="sketching-tool color-mode generic-btn active">Color Mode</button>
+                <button class="sketching-tool generic-btn rainbow-mode ">Rainbow Mode</button>
+                <button class="sketching-tool generic-btn darken-mode">10% Darken</button>
+                <button class="sketching-tool generic-btn lighten-mode">10% Lighten</button>
+                <button class="sketching-tool generic-btn eraser-mode ">Eraser</button>
+                <button class="clear-button generic-btn">Clear</button>
+                <button class="grid-lines-button generic-btn">Toggle Grid Lines</button>
+            </div>
         </div>
-        <div class="sketching-box">
-            
+        <div class="sketching-board-wrapper">
+            <div class="pixel-slider">
+                <h3 class="pixel-slider-output"></h3>
+                <input type="range" value="4" min="1" max="64">
+            </div>
+            <div class="sketching-board grid-lines-active">
+            </div>
         </div>
     </div>
 </body>
+<script>
+
+    const print = (str) => {
+        console.log(str);
+    }
+
+    const getSketchingBoard = () => document.querySelector(".sketching-board");
+    const getPixelSlider = () => document.querySelector(".pixel-slider input");
+    const getSketchingTools = () => document.querySelectorAll(".sketching-tool");
+    const getSketchingBoardRows = () => document.querySelectorAll(".board-row");
+    const getAllPixels = () => document.querySelectorAll(".board-pixel");
+    const getClearButton = () => document.querySelector(".clear-button");
+    const getGridLinesButton = () => document.querySelector(".grid-lines-button");
+    const getActiveTool = () => document.querySelector(".sketching-tool.active");
+    const getSliderOutput = () => document.querySelector(".pixel-slider-output");
+
+    const generateRandomColor = () => "#" + ((1<<24)*Math.random() | 0).toString(16);
+
+    const drawSketchingBoard = (e) => {
+        const sketchingBoard = getSketchingBoard();
+        const boardRows = getPixelSlider().value;
+        const boardColumns = boardRows;
+
+        updateSliderOutput(boardRows, boardColumns);
+
+        getSketchingBoardRows().forEach(row => sketchingBoard.removeChild(row));
+
+        for(let i = 0; i < boardRows; i++) {
+            const boardRow = document.createElement("div");
+            boardRow.classList.add("board-row");
+            for(let j = 0; j < boardRows; j++) {
+                const pixel = document.createElement("div");
+                pixel.classList.add("board-pixel");
+                pixel.addEventListener("pointerdown", paintPixel);
+                boardRow.appendChild(pixel);
+            }
+            sketchingBoard.appendChild(boardRow);
+        }
+    }
+
+    const updateSliderOutput = (row, col) => {
+        getSliderOutput().textContent = `${row} x ${col}`;
+    }
+
+    const clearSketchingBoard = (e) => {
+        getAllPixels().forEach(pixel => pixel.style["background-color"] = "white");
+    }
+
+    const changeTool = (e) => {
+        getActiveTool().classList.toggle("active");
+        e.target.classList.toggle("active");
+    }
+
+    const toggleGridLines = (e) => {
+        getSketchingBoard().classList.toggle("grid-lines-active");
+    }
+
+    function shadeColor(color, percent) {
+
+        rgb = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(,\s*\d+\.*\d+)?\)$/);
+    
+        R = rgb[1]
+        G = rgb[2]
+        B = rgb[3]
+
+        R = parseInt(R * (100 + percent) / 100);
+        G = parseInt(G * (100 + percent) / 100);
+        B = parseInt(B * (100 + percent) / 100);
+
+        R = (R<255)?R:255;  
+        G = (G<255)?G:255;  
+        B = (B<255)?B:255;  
+
+        var RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+        var GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+        var BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+        return "#"+RR+GG+BB;
+    }
+
+    const getColorToPaint = (e) => {
+        const tool = getActiveTool();
+        let color = "none"
+
+        if(tool.classList.contains("rainbow-mode")) {
+            color = generateRandomColor();
+        } else if(tool.classList.contains("eraser-mode")) {
+            color = "#FFFFFF"
+        } else if(tool.classList.contains("color-mode")) {
+            color = document.querySelector(".color-selector").value;
+        } else if(tool.classList.contains("darken-mode")) {
+            color = shadeColor(e.target.style["background-color"], -10);
+        } else if(tool.classList.contains("lighten-mode")) {
+            color = shadeColor(e.target.style["background-color"], 10);
+        }
+
+        return color;
+    }
+
+    const changePixelColor = (pixel, color) => {
+        pixel.style["background-color"] = color;
+    }
+
+    const paintPixel = (e) => {
+        const pixel = e.target;
+        const pixels = getAllPixels(e);
+
+        changePixelColor(pixel, getColorToPaint(e));
+
+        const holdEvent = (e) => changePixelColor(e.target, getColorToPaint(e));
+        const removeHoldEvent = (e) => pixels.forEach(pixel => pixel.removeEventListener("pointerover", holdEvent));
+
+
+        pixels.forEach(pixel => pixel.addEventListener("pointerover", holdEvent));
+        pixels.forEach(pixel => pixel.addEventListener("pointerup", removeHoldEvent, { once: true }));
+    }
+
+    drawSketchingBoard();
+
+    getPixelSlider().addEventListener("change", drawSketchingBoard);
+    getSketchingTools().forEach(tool => tool.addEventListener("click", changeTool));
+    getClearButton().addEventListener("click", clearSketchingBoard);
+    getGridLinesButton().addEventListener("click", toggleGridLines);
+</script>
 </html>

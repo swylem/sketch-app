@@ -1,0 +1,144 @@
+@font-face {
+    font-family: "JetBrainsMono Regular";
+    src: url("./fonts/JetBrainsMono-Regular.ttf");
+}
+
+body {
+    background-color: rgb(237, 237, 237);
+}
+
+* {
+    box-sizing: border-box;
+    font-family: "JetBrainsMono Regular";
+    text-align: center;
+}
+
+.generic-btn {
+    background-color: transparent;
+    outline: solid 1px black;
+    border: none;
+    padding: 8px;
+}
+
+.generic-btn:hover {
+    outline: solid 2px black;
+    cursor: pointer;
+}
+
+.container {
+    margin-top: 64px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+    align-content: space-between;
+    gap: 16px;
+}
+
+.sketching-tools {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+    min-width: 256px;
+}
+
+.sketching-tools .generic-btn {
+    flex: 1;
+    min-width: 96px;
+    max-width: 240px;
+}
+
+.pixel-slider input[type="range"] {
+    width: 50%;
+    accent-color: darkred;
+}
+
+.pixel-slider-output {
+    display: inline-block;
+    margin-right: 16px;
+}
+
+.sketching-tools-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+}
+
+.sketching-board-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    width: 512px;
+}
+
+.color-selector {
+    width: 96px;
+    height: 96px;
+
+    border-radius: 50%;
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-progress-appearance: none;
+    appearance: none;
+
+    border-color: black;
+
+    cursor: pointer;
+
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.color-selector::-webkit-color-swatch {
+    border-radius: 50%;
+}
+
+.color-selector::-moz-color-swatch {
+    border-radius: 50%;
+}
+
+.sketching-board:hover {
+    cursor: crosshair;
+}
+
+.sketching-tools button.active {
+    background-color: black;
+    color: white;
+}
+
+.sketching-board {
+    width: 100%;
+    height: 512px;
+    border: 1px solid black;
+
+    display: flex;
+    overflow: hidden;
+}
+
+.sketching-board.grid-lines-active  .board-pixel {
+    border: 1px solid #d3d3d3;
+}
+
+.board-row {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+}
+
+.board-pixel {
+    background-color: white;
+    flex: 1;
+    pointer-events: auto;
+}
+
+
+@media screen and (max-width: 960px) {
+    .sketching-tools {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
